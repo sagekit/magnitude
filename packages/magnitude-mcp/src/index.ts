@@ -181,13 +181,36 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                     harness = null;
                 }
 
+                // Clear crash state from Chrome preferences to prevent the session restore popup
+                const prefsPath = path.join(profileDir, 'Default', 'Preferences');
+                if (fs.existsSync(prefsPath)) {
+                    try {
+                        const prefs = JSON.parse(fs.readFileSync(prefsPath, 'utf8'));
+                        if (prefs.profile && prefs.profile.exit_type) {
+                            prefs.profile.exit_type = 'Normal';
+                            prefs.profile.exited_cleanly = true;
+                        }
+                        fs.writeFileSync(prefsPath, JSON.stringify(prefs));
+                    } catch (e) {
+                        // Ignore errors, preferences might not exist yet
+                    }
+                }
+
                 // Launch browser with default profile
                 context = await chromium.launchPersistentContext(profileDir, {
                     channel: "chrome",
                     headless: false,
                     viewport: { width: 1024, height: 768 },
                     deviceScaleFactor: process.platform === 'darwin' ? 2 : 1,
-                    args: ['--disable-infobars']
+                    args: [
+                        '--disable-infobars',  // Hide "Chrome is controlled" banner
+                        '--no-first-run',  // Skip first run experience
+                        '--disable-session-crashed-bubble',  // Disable crash restore popup
+                        '--disable-features=InfiniteSessionRestore',  // Disable session restore
+                        '--no-default-browser-check'  // Skip default browser check
+                    ],
+                    // These cause an annoying banner to show up no matter what, but help with stealth if we leave them
+                    ignoreDefaultArgs: ['--no-sandbox', '--disable-blink-features=AutomationControlled']
                 });
 
                 // Create harness
