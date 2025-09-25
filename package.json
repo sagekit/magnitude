@@ -8,8 +8,7 @@
     "check-types": "turbo run check-types",
     "changeset": "changeset",
     "version-packages": "changeset version",
-    "release": "turbo run build && changeset publish",
-    "postinstall": "turbo run build"
+    "release": "turbo run build && changeset publish"
   },
   "devDependencies": {
     "@changesets/changelog-github": "^0.5.1",

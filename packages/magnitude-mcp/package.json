@@ -1,26 +1,62 @@
 {
   "name": "magnitude-mcp",
-  "version": "0.0.4",
-  "description": "MCP server for Magnitude testing",
-  "main": "build/index.js",
+  "version": "0.1.0",
+  "description": "MCP server for Magnitude browser automation",
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "dist/index.js",
   "type": "module",
   "bin": {
-    "magnitude-mcp": "./build/index.js"
+    "magnitude-mcp": "./dist/index.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/magnitudedev/magnitude.git"
+  },
+  "homepage": "https://github.com/magnitudedev/magnitude#readme",
+  "bugs": {
+    "url": "https://github.com/magnitudedev/magnitude/issues"
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "magnitude",
+    "browser-automation",
+    "ai",
+    "agent",
+    "testing"
+  ],
   "scripts": {
-    "build": "tsc && node -e \"require('node:fs').chmodSync('build/index.js', '755')\"",
-    "start": "node build/index.js",
-    "dev": "tsc -w",
-    "test": "tsc && node build/test.js",
-    "inspector": "npx @modelcontextprotocol/inspector build/index.js"
+    "build": "tsup",
+    "start": "node dist/index.js",
+    "dev": "tsup --watch",
+    "check-types": "tsc --noEmit",
+    "inspector": "npx @modelcontextprotocol/inspector dist/index.js"
   },
+  "author": {
+    "name": "Magnitude",
+    "email": "founders@magnitude.run",
+    "url": "https://magnitude.run"
+  },
+  "contributors": [
+    "Anders Lie <anders@magnitude.run>",
+    "Tom Greenwald <tom@magnitude.run>"
+  ],
+  "license": "Apache-2.0",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.9.0",
+    "@modelcontextprotocol/sdk": "^1.18.0",
+    "patchright": "^1.49.0",
+    "magnitude-core": "^0.2.31",
     "zod": "^3.24.2",
     "zod-to-json-schema": "^3.24.5"
   },
   "devDependencies": {
     "@types/node": "^20.17.30",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "tsup": "^8.0.0"
   }
 }
