@@ -52,7 +52,11 @@ export class CursorVisual {
         try {
             await this.page.evaluate(
                 ({ x, y, id, showClickEffect }) => {
-                    // Adjust coordinates for scroll position first, as they are needed for both effects
+                    // Use viewport coordinates directly (no scroll adjustment for fixed positioning)
+                    const viewportX = x;
+                    const viewportY = y;
+
+                    // Document coordinates for the click effect circle (which uses absolute positioning)
                     const docX = x + window.scrollX;
                     const docY = y + window.scrollY;
 
@@ -95,7 +99,7 @@ export class CursorVisual {
                     if (!pointerElement) {
                         pointerElement = document.createElement('div');
                         pointerElement.id = id;
-                        pointerElement.style.position = 'absolute';
+                        pointerElement.style.position = 'fixed';  // Use fixed positioning for viewport-relative
                         pointerElement.style.zIndex = '1000000100';
                         pointerElement.style.pointerEvents = 'none'; // Don't interfere with actual clicks
                         // Notice that transition is 300ms
@@ -134,13 +138,13 @@ export class CursorVisual {
                         document.body.appendChild(pointerElement);
                     }
                     
-                    //pointerElement.style.display = 'none'; 
-                    
-                    // Update position - adjust coordinates for scroll position so the tip of the pointer is at (x,y) relative to the document
-                    // Set the top-left corner to (docX, docY) and then translate by (-1px, -3px)
-                    // to align the pointer tip (approx. at 1.27, 4.17 within the SVG) with (docX, docY).
-                    pointerElement.style.left = `${docX}px`;
-                    pointerElement.style.top = `${docY}px`;
+                    //pointerElement.style.display = 'none';
+
+                    // Update position - use viewport coordinates for fixed positioning
+                    // Set the top-left corner to (viewportX, viewportY) and then translate by (-1px, -3px)
+                    // to align the pointer tip (approx. at 1.27, 4.17 within the SVG) with the click point.
+                    pointerElement.style.left = `${viewportX}px`;
+                    pointerElement.style.top = `${viewportY}px`;
                     pointerElement.style.transform = 'translate(-1px, -3px)';
                 },
                 { x, y, id: this.visualElementId, showClickEffect }

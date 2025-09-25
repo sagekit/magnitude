@@ -144,12 +144,12 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         tools: [
             {
                 name: 'open_browser',
-                description: 'Open browser with persistent profile',
+                description: 'Open browser with persistent profile that you can control.',
                 inputSchema: zodToJsonSchema(ConnectBrowserSchema),
             },
             {
                 name: 'act',
-                description: 'Perform actions in the browser. Combine multiple actions at the same time for efficiency.',
+                description: 'Perform actions in the browser. Combine multiple actions at the same time for efficiency. The blue cursor represents the last position you interacted with, however it may sometimes be missing or misplaced even after a successful interaction.',
                 inputSchema: zodToJsonSchema(ActSchema),
             },
             {
@@ -186,12 +186,16 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                     channel: "chrome",
                     headless: false,
                     viewport: { width: 1024, height: 768 },
-                    deviceScaleFactor: process.platform === 'darwin' ? 2 : 1
+                    deviceScaleFactor: process.platform === 'darwin' ? 2 : 1,
+                    args: ['--disable-infobars']
                 });
 
                 // Create harness
                 // Use Claude's virtual screen dimensions since we do not know that model might use the MCP server
-                harness = new WebHarness(context, { virtualScreenDimensions: { width: 1024, height: 768 }});
+                harness = new WebHarness(context, {
+                    virtualScreenDimensions: { width: 1024, height: 768 },
+                    switchTabsOnActivity: true // detect user activity in the browser to try and keep active tab in sync
+                });
                 await harness.start();
 
                 // Navigate to provided URL or Google by default
