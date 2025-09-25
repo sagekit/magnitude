@@ -309,6 +309,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                     }
                 }
 
+                // Wait for page to stabilize after all actions
+                await harness.waitForStability();
+
                 // Get current state
                 const state = await getCurrentState();
 
