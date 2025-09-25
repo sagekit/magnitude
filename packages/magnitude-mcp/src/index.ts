@@ -14,12 +14,23 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { homedir } from 'os';
 
-// Profile directory - configurable via env var or default
-const profileDir = process.env.MAGNITUDE_PROFILE_DIR || path.join(homedir(), '.magnitude', 'profiles', 'default');
-if (!fs.existsSync(profileDir)) {
-    fs.mkdirSync(profileDir, { recursive: true });
+// Configuration from environment variables
+const config = {
+    profileDir: process.env.MAGNITUDE_MCP_PROFILE_DIR || path.join(homedir(), '.magnitude', 'profiles', 'default'),
+    stealth: !!process.env.MAGNITUDE_MCP_STEALTH,  // Enable stealth mode (shows warning banner but better anti-detection)
+    viewportWidth: parseInt(process.env.MAGNITUDE_MCP_VIEWPORT_WIDTH || '1024'),
+    viewportHeight: parseInt(process.env.MAGNITUDE_MCP_VIEWPORT_HEIGHT || '768'),
+};
+
+// Ensure profile directory exists
+if (!fs.existsSync(config.profileDir)) {
+    fs.mkdirSync(config.profileDir, { recursive: true });
 }
-console.log(`Using browser profile directory: ${profileDir}`);
+
+console.log(`Using browser profile directory: ${config.profileDir}`);
+if (config.stealth) {
+    console.log('Stealth mode enabled - warning banner may appear but anti-detection is improved');
+}
 
 // Action schemas with discriminated union
 const ClickActionSchema = z.object({
@@ -182,7 +193,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                 }
 
                 // Clear crash state from Chrome preferences to prevent the session restore popup
-                const prefsPath = path.join(profileDir, 'Default', 'Preferences');
+                const prefsPath = path.join(config.profileDir, 'Default', 'Preferences');
                 if (fs.existsSync(prefsPath)) {
                     try {
                         const prefs = JSON.parse(fs.readFileSync(prefsPath, 'utf8'));
@@ -197,21 +208,26 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                 }
 
                 // Launch browser with default profile
-                context = await chromium.launchPersistentContext(profileDir, {
+                const launchOptions: any = {
                     channel: "chrome",
                     headless: false,
-                    viewport: { width: 1024, height: 768 },
+                    viewport: { width: config.viewportWidth, height: config.viewportHeight },
                     deviceScaleFactor: process.platform === 'darwin' ? 2 : 1,
                     args: [
                         '--disable-infobars',  // Hide "Chrome is controlled" banner
                         '--no-first-run',  // Skip first run experience
                         '--disable-session-crashed-bubble',  // Disable crash restore popup
                         '--disable-features=InfiniteSessionRestore',  // Disable session restore
-                        '--no-default-browser-check'  // Skip default browser check
-                    ],
-                    // These cause an annoying banner to show up no matter what, but help with stealth if we leave them
-                    ignoreDefaultArgs: ['--no-sandbox', '--disable-blink-features=AutomationControlled']
-                });
+                        '--no-default-browser-check',  // Skip default browser check
+                    ]
+                };
+
+                // If stealth mode is NOT enabled, remove the flags that cause warning banner
+                if (!config.stealth) {
+                    launchOptions.ignoreDefaultArgs = ['--no-sandbox', '--disable-blink-features=AutomationControlled'];
+                }
+
+                context = await chromium.launchPersistentContext(config.profileDir, launchOptions);
 
                 // Create harness
                 // Use Claude's virtual screen dimensions since we do not know that model might use the MCP server
