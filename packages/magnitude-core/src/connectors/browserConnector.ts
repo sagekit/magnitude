@@ -102,7 +102,7 @@ export class BrowserConnector implements AgentConnector {
     }
 
     getActionSpace(): ActionDefinition<any>[] {
-        return webActions;
+        return [...webActions];
     }
     
     // public get page(): Page {
