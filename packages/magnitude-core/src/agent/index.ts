@@ -12,6 +12,7 @@ import { AgentError } from "@/agent/errors";
 import { AgentMemory, AgentMemoryOptions } from "@/memory";
 import { ActionDefinition } from "@/actions";
 import { taskActions } from "@/actions/taskActions";
+import { convertActionDefinitionsForModel } from "@/actions/schemaConverter";
 import { ConnectorInstructions, AgentContext, traceAsync, MultiMediaContentPart } from "@/ai/baml_client";
 import { telemetrifyAgent } from '@/telemetry/events';
 import { isClaude } from '@/ai/util';
@@ -163,8 +164,11 @@ export class Agent {
     }
 
     identifyAction(action: Action) {
-        // Get definition corresponding to an action
-        const actionDefinition = this.actions.find(def => def.name === action.variant);
+        // Get definition corresponding to an action - use converted actions if available
+        const modelName = this.models.describe();
+        const convertedActions = convertActionDefinitionsForModel(this.actions, modelName);
+
+        const actionDefinition = convertedActions.find(def => def.name === action.variant);
 
         if (!actionDefinition) {
             // It's possible the action name was from a connector that is no longer active,
@@ -267,9 +271,9 @@ export class Agent {
 
     async _traceAct(task: string, memory: AgentMemory, options: ActOptions = {}) {
         // memory not serializable to trace so bake it
-        await (traceAsync('act', async (task: string) => {
-            await this._act(task, memory, options);
-        })(task));
+        //await (traceAsync('act', async (task: string) => {
+        await this._act(task, memory, options);
+        //})(task));
     }
 
     private async _buildContext(memory: AgentMemory): Promise<AgentContext> {

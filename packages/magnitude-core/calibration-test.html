@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Clicking Calibration</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            background: #f0f0f0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dot {
+            width: 20px;
+            height: 20px;
+            background: #ff0000;
+            border-radius: 50%;
+            position: absolute;
+            transform: translate(-50%, -50%);
+        }
+
+
+        /* Center square dots (corners of inner square at grid intersections) */
+        .inner-top-left { top: 33.33vh; left: 33.33vw; }
+        .inner-top-right { top: 33.33vh; left: 66.67vw; }
+        .inner-bottom-left { top: 66.67vh; left: 33.33vw; }
+        .inner-bottom-right { top: 66.67vh; left: 66.67vw; }
+
+        /* Center dot */
+        .center { top: 50vh; left: 50vw; }
+    </style>
+</head>
+<body>
+    <!-- Corner dots -->
+    <div class="dot top-left"></div>
+    <div class="dot top-right"></div>
+    <div class="dot bottom-left"></div>
+    <div class="dot bottom-right"></div>
+
+    <!-- Inner square dots -->
+    <div class="dot inner-top-left"></div>
+    <div class="dot inner-top-right"></div>
+    <div class="dot inner-bottom-left"></div>
+    <div class="dot inner-bottom-right"></div>
+
+    <!-- Center dot -->
+    <div class="dot center"></div>
+</body>
+</html>

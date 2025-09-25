@@ -14,6 +14,7 @@ import { ActionDefinition } from "@/actions";
 import TypeBuilder from "./baml_client/type_builder";
 import { Schema, z } from 'zod';
 import { convertActionDefinitionsToBaml, convertZodToBaml } from "@/actions/util";
+import { convertActionDefinitionsForModel } from "@/actions/schemaConverter";
 import { Image } from '@/memory/image';
 import EventEmitter from "eventemitter3";
 import { MultiMediaContentPart } from "@/memory/rendering";
@@ -181,7 +182,11 @@ export class ModelHarness {
     ): Promise<{ reasoning: string, actions: Action[] }> {
         const tb = new TypeBuilder();
 
-        tb.PartialRecipe.addProperty('actions', tb.list(convertActionDefinitionsToBaml(tb, actionVocabulary))).description('Always provide at least one action');
+        // Convert action definitions based on model
+        const modelName = this.describeModel();
+        const convertedActions = convertActionDefinitionsForModel(actionVocabulary, modelName);
+
+        tb.PartialRecipe.addProperty('actions', tb.list(convertActionDefinitionsToBaml(tb, convertedActions))).description('Always provide at least one action');
 
         const start = Date.now();
         // Assuming this.baml.CreatePartialRecipe is now typed to accept ModularMemoryContext
