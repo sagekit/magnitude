@@ -100,40 +100,39 @@ export class CursorVisual {
                         pointerElement = document.createElement('div');
                         pointerElement.id = id;
                         pointerElement.style.position = 'fixed';  // Use fixed positioning for viewport-relative
-                        pointerElement.style.zIndex = '1000000100';
+                        pointerElement.style.width = '32px';
+                        pointerElement.style.height = '32px';
+                        pointerElement.style.zIndex = '2147483647';  // Max z-index
                         pointerElement.style.pointerEvents = 'none'; // Don't interfere with actual clicks
                         // Notice that transition is 300ms
                         pointerElement.style.transition = 'left 0.3s cubic-bezier(0.25, 0.1, 0.25, 1), top 0.3s cubic-bezier(0.25, 0.1, 0.25, 1)';
 
-                        // Set the innerHTML to the new SVG
-                        pointerElement.innerHTML = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<svg
-   width="32"
-   height="32"
-   viewBox="0 0 113.50408 99.837555"
-   version="1.1"
-   id="svg1"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:svg="http://www.w3.org/2000/svg">
-  <defs
-     id="defs1" />
-  <g
-     id="layer1"
-     transform="translate(-413.10686,-501.19661)">
-    <path
-       style="fill:#026aa1;fill-opacity:1;stroke:#000000;stroke-width:0;stroke-dasharray:none;stroke-opacity:1"
-       d="m 416.1069,504.1966 52.47697,93.83813 8.33253,-57.61019 z"
-       id="path14-1" />
-    <path
-       style="fill:#0384c7;fill-opacity:1;stroke:#000000;stroke-width:0;stroke-dasharray:none;stroke-opacity:1"
-       d="m 416.1069,504.1966 60.8095,36.22794 46.69517,-34.75524 z"
-       id="path15-8" />
-    <path
-       style="fill:#0384c7;fill-opacity:0;stroke:#000000;stroke-width:6;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
-       d="m 416.1069,504.19658 52.47698,93.83813 8.33252,-57.61019 46.69517,-34.75521 -107.50467,-1.47273"
-       id="path16" />
-  </g>
-</svg>`;
+                        // Create SVG using DOM methods to avoid Trusted Types issues
+                        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                        svg.setAttribute('width', '32');
+                        svg.setAttribute('height', '32');
+                        svg.setAttribute('viewBox', '0 0 113.50408 99.837555');
+
+                        const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                        g.setAttribute('transform', 'translate(-413.10686,-501.19661)');
+
+                        const path1 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                        path1.setAttribute('style', 'fill:#026aa1;fill-opacity:1;stroke:#000000;stroke-width:0');
+                        path1.setAttribute('d', 'm 416.1069,504.1966 52.47697,93.83813 8.33253,-57.61019 z');
+
+                        const path2 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                        path2.setAttribute('style', 'fill:#0384c7;fill-opacity:1;stroke:#000000;stroke-width:0');
+                        path2.setAttribute('d', 'm 416.1069,504.1966 60.8095,36.22794 46.69517,-34.75524 z');
+
+                        const path3 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                        path3.setAttribute('style', 'fill:#0384c7;fill-opacity:0;stroke:#000000;stroke-width:6;stroke-linecap:round;stroke-linejoin:round');
+                        path3.setAttribute('d', 'm 416.1069,504.19658 52.47698,93.83813 8.33252,-57.61019 46.69517,-34.75521 -107.50467,-1.47273');
+
+                        g.appendChild(path1);
+                        g.appendChild(path2);
+                        g.appendChild(path3);
+                        svg.appendChild(g);
+                        pointerElement.appendChild(svg);
 
                         document.body.appendChild(pointerElement);
                     }
