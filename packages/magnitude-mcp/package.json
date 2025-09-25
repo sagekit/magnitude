@@ -5,10 +5,22 @@
   "publishConfig": {
     "access": "public"
   },
-  "main": "dist/index.js",
   "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.cts",
   "bin": {
-    "magnitude-mcp": "./dist/index.js"
+    "magnitude-mcp": "dist/index.js"
+  },
+  "exports": {
+    "require": {
+      "types": "./dist/index.d.cts",
+      "default": "./dist/index.cjs"
+    },
+    "import": {
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
+    }
   },
   "repository": {
     "type": "git",
@@ -31,10 +43,8 @@
     "testing"
   ],
   "scripts": {
-    "build": "tsup",
-    "start": "node dist/index.js",
-    "dev": "tsup --watch",
-    "check-types": "tsc --noEmit",
+    "build": "tsc && pkgroll",
+    "check": "tsc --noEmit",
     "inspector": "npx @modelcontextprotocol/inspector dist/index.js",
     "postinstall": "patchright install chromium"
   },
@@ -57,7 +67,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.17.30",
-    "typescript": "^5.8.3",
-    "tsup": "^8.0.0"
+    "pkgroll": "^2.15.4",
+    "typescript": "^5.8.3"
   }
 }
