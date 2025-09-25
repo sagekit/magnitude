@@ -35,7 +35,8 @@
     "start": "node dist/index.js",
     "dev": "tsup --watch",
     "check-types": "tsc --noEmit",
-    "inspector": "npx @modelcontextprotocol/inspector dist/index.js"
+    "inspector": "npx @modelcontextprotocol/inspector dist/index.js",
+    "postinstall": "patchright install chromium"
   },
   "author": {
     "name": "Magnitude",
