@@ -1,5 +1,18 @@
 # magnitude-test
 
+## 0.3.11
+
+### Patch Changes
+
+- [#131](https://github.com/sagekit/magnitude/pull/131) [`9d4b8a5`](https://github.com/sagekit/magnitude/commit/9d4b8a52badd6d5c39d3357b8a1713bd875154d6) Thanks [@ewired](https://github.com/ewired)! - Code structure change to improve IPC for future reworking and fix a build issue with a circular dependency.
+
+- [#134](https://github.com/sagekit/magnitude/pull/134) [`510c24e`](https://github.com/sagekit/magnitude/commit/510c24e9ae85b9497a133f6ae93c9ccde3da56f5) Thanks [@ewired](https://github.com/ewired)! - magnitude-test now shows rich data in --debug logs including agent thoughts, token usage and known costs. --plain is now available for easily readable plain text logs. display.thoughts is now available in magnitude.config.ts to show thoughts in the TUI.
+
+- [`9123917`](https://github.com/sagekit/magnitude/commit/9123917e4dd8be30687b43be6797d152fdffc571) Thanks [@anerli](https://github.com/anerli)! - fix: add array llm client type to test config
+
+- Updated dependencies [[`b1ee0c2`](https://github.com/sagekit/magnitude/commit/b1ee0c225ee33ac22f96a8c1828d6101921e57fc)]:
+  - magnitude-core@0.2.32
+
 ## 0.3.10
 
 ### Patch Changes
