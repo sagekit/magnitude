@@ -4,59 +4,7 @@ import { BrowserConnector } from "@/connectors/browserConnector"; // Changed fro
 import { AgentError } from "@/agent/errors"; // For error handling
 import { Agent } from "@/agent"; // Import Agent type for agent parameter
 
-// For separate grounding
-export const clickTargetAction = createAction({
-    name: 'mouse:click',
-    description: "Click something",
-    schema: z.object({
-        target: z.string().describe("Where exactly to click"),
-    }),
-    resolver: async ({ input: { target }, agent }) => {
-        const web = agent.require(BrowserConnector);
-        const harness = web.getHarness();
-        const screenshot = await web.getLastScreenshot();
-        const { x, y } = await web.requireGrounding().locateTarget(screenshot, target);
-        await harness.click({ x, y });
-    },
-    //render: ({ x, y}) => `⊙ Clicked (${})`
-});
 
-// For separate grounding
-// export const clickTargetAndType = createAction({
-//     name: 'browser:type',
-//     description: "Click something and type into it",
-//     schema: z.object({
-//         target: z.string().describe("Where exactly to click before typing"),
-//         content: z.string().describe("Content to type, insert sequences <enter> or <tab> for those keypresses respectively."),
-//     }),
-//     resolver: async ({ input: { target, content }, agent }) => {
-//         const web = agent.require(BrowserConnector);
-//         const harness = web.getHarness();
-//         const screenshot = await web.getLastScreenshot();
-//         const { x, y } = await web.requireGrounding().locateTarget(screenshot, target);
-//         await harness.clickAndType({ x, y, content });
-//     }
-// });
-
-// For separate grounding
-export const scrollTargetAction = createAction({
-    name: 'mouse:scroll',
-    description: "Hover mouse over target and scroll",
-    schema: z.object({
-        target: z.string().describe("Somewhere specific inside the container to scroll in"),
-        deltaX: z.number().int().describe("Pixels to scroll horizontally"),
-        deltaY: z.number().int().describe("Pixels to scroll vertically"),
-    }),
-    resolver: async ({ input: { target, deltaX, deltaY }, agent }) => {
-        const web = agent.require(BrowserConnector);
-        const harness = web.getHarness();
-        const screenshot = await web.getLastScreenshot();
-        const { x, y } = await web.requireGrounding().locateTarget(screenshot, target);
-        await harness.scroll({ x, y, deltaX, deltaY });
-    }
-});
-
-// For grounded planner
 export const clickCoordAction = createAction({
     name: 'mouse:click',
     description: "Click something",
@@ -160,7 +108,6 @@ export const keyboardSelectAllAction = createAction({
     render: () => `⬚ select all`
 });
 
-// For grounded planner
 export const scrollCoordAction = createAction({
     name: 'mouse:scroll',
     description: "Hover mouse over target and scroll",
@@ -244,15 +191,14 @@ export const waitAction = createAction({
     render: ({ seconds }) => `◴ wait for ${seconds}s`
 });
 
-// export const webActions = [
-//     clickTargetAction,
-//     clickTargetAndType,
-//     scrollTargetAction,
-//     switchTabAction,
-// ] as const;
 
 
-export const agnosticWebActions = [
+export const webActions = [
+    clickCoordAction,
+    mouseDoubleClickAction,
+    mouseRightClickAction,
+    scrollCoordAction,
+    mouseDragAction,
     newTabAction,
     switchTabAction,
     navigateAction,
@@ -264,18 +210,3 @@ export const agnosticWebActions = [
     waitAction,
 ] as const;
 
-export const coordWebActions = [
-    clickCoordAction,
-    mouseDoubleClickAction,
-    mouseRightClickAction,
-    scrollCoordAction,
-    mouseDragAction,
-    //typeAction
-] as const;
-
-export const targetWebActions = [
-    clickTargetAction,
-    //typeAction,
-    //clickTargetAndType,
-    scrollTargetAction
-] as const;

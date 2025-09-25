@@ -98,7 +98,7 @@ messageEmitter.on('message', async (message: TestWorkerIncomingMessage) => {
     }
 
     const { testId } = message;
-    const { browserOptions, llm, grounding, telemetry } = workerData;
+    const { browserOptions, llm, telemetry } = workerData;
     const testFn = testFunctions.get(testId);
 
     if (!testFn) {
@@ -127,8 +127,7 @@ messageEmitter.on('message', async (message: TestWorkerIncomingMessage) => {
             agentOptions: { llm, ...(prompt ? { prompt } : {}) },
             browserOptions: {
                 url: testMetadata.url,
-                browser: browserOptions,
-                grounding
+                browser: browserOptions
             }
         });
 

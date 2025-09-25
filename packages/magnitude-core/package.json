@@ -48,18 +48,17 @@
   "license": "Apache-2.0",
   "devDependencies": {
     "@types/node": "^22.13.4",
+    "@types/object-hash": "^3.0.6",
     "pkgroll": "^2.10.0",
     "typescript": "~5.7.2"
   },
   "dependencies": {
     "@boundaryml/baml": "^0.202.0",
     "@paralleldrive/cuid2": "^2.2.2",
-    "@types/object-hash": "^3.0.6",
     "ansis": "^4.1.0",
     "commander": "^13.1.0",
     "eventemitter3": "^5.0.1",
     "magnitude-extract": "0.0.2",
-    "moondream": "^0.1.0",
     "object-hash": "^3.0.0",
     "pino": "^9.6.0",
     "pino-pretty": "^13.0.0",

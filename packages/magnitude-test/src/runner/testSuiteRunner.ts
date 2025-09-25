@@ -93,7 +93,6 @@ export class TestSuiteRunner {
                 options: this.getActiveOptions(),
                 browserOptions: this.config.browser,
                 llm: this.config.llm,
-                grounding: this.config.grounding,
                 telemetry: this.config.telemetry
             } satisfies TestWorkerData;
 

@@ -198,25 +198,6 @@ program
         //     config.planner = planner;
         // }
 
-        // logger.info({ ...config.planner }, "Planner:");
-        // //console.log(magnitudeBlue(`Using planner: ${describeModel(config.planner)}`));
-
-        // // If executor not provided, default to moondream cloud with MOONDREAM_API_KEY
-        // if (!config.executor || !config.executor.options || (!config.executor.options.apiKey && !config.executor.options.baseUrl)) {
-        //     const apiKey = process.env.MOONDREAM_API_KEY;
-        //     if (!apiKey) {
-        //         console.error("Missing MOONDREAM_API_KEY, get one at https://moondream.ai/c/cloud/api-keys");
-        //         process.exit(1);
-        //     }
-
-        //     config.executor = {
-        //         provider: 'moondream',
-        //         options: {
-        //             apiKey
-        //             // don't pass base URL, use moondream client default (https://api.moondream.ai/v1)
-        //         }
-        //     }
-        // }
 
         // logger.info({ ...config.executor }, "Executor:");
         //console.log(magnitudeBlue(`Using executor: ${config.executor.provider}`));

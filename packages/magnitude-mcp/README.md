@@ -9,7 +9,7 @@ If the agent model is not Claude Sonnet 4, Sonnet 3.7, Opus 4, Qwen 2.5 VL, or Q
 
 ## Installation
 ```sh
-npm i -g magnitude-mcp
+npm i -g magnitude-mcp@latest
 ```
 
 MCP Configuration:

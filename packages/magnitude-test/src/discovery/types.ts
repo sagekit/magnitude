@@ -1,6 +1,6 @@
 import { BrowserContext, BrowserContextOptions, LaunchOptions, Page } from "playwright";
 //import type { PlannerClient, ExecutorClient, TestCaseAgent, Magnus } from 'magnitude-core';
-import { BrowserOptions, GroundingClient, LLMClient } from "magnitude-core";
+import { BrowserOptions, LLMClient } from "magnitude-core";
 import { TestCaseAgent } from "@/agent";
 
 export interface TestOptions {
@@ -20,7 +20,6 @@ export type MagnitudeConfig = {
     //apiKey?: string;
     url: string; // base URL used as default, required
     llm?: LLMClient | LLMClient[],
-    grounding?: GroundingClient,
     webServer?: WebServerConfig | WebServerConfig[],
     // browser?: {
     //     contextOptions?: BrowserContextOptions,

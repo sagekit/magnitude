@@ -9,7 +9,6 @@ export const allBrowserAgentRoles: BrowserAgentRole[] = ['act', 'extract', 'quer
 // Approximately mirrors https://docs.boundaryml.com/ref/llm-client-providers
 export type LLMClient = (AnthropicClient | ClaudeCodeClient | BedrockClient | GoogleAIClient | GoogleVertexClient | OpenAIClient | OpenAIGenericClient | AzureOpenAIClient) &
     { roles?: BrowserAgentRole[] };
-export type GroundingClient = MoondreamClient;
 
 export interface AnthropicClient {
     provider: 'anthropic',
@@ -100,13 +99,6 @@ export interface OpenAIGenericClient {
     }
 }
 
-export interface MoondreamClient {
-    provider: 'moondream',
-    options: {
-        baseUrl?: string,
-        apiKey?: string
-    }
-}
 
 
 export interface LLMClientIdentifier {

@@ -2,7 +2,7 @@ import { AgentConnector } from ".";
 //import { Observation, BamlRenderable } from "@/memory";
 import { WebHarness } from "@/web/harness";
 import { ActionDefinition } from '@/actions';
-import { agnosticWebActions, coordWebActions, targetWebActions } from '@/actions/webActions';
+import { webActions } from '@/actions/webActions';
 import { Browser, BrowserContext, BrowserContextOptions, LaunchOptions } from "playwright";
 import { BrowserOptions, BrowserProvider } from "@/web/browserProvider";
 import logger from "@/logger";
@@ -10,8 +10,6 @@ import { Logger } from 'pino';
 import { TabState } from '@/web/tabs';
 import { Observation } from "@/memory/observation";
 import { Image } from "@/memory/image";
-import { GroundingClient } from "@/ai/types";
-import { GroundingService, moondreamTargetingInstructions } from "@/ai/grounding";
 import { ActionVisualizerOptions } from "@/web/visualizer";
 
 // export type BrowserOptions = ({ instance: Browser } | { launchOptions?: LaunchOptions }) & {
@@ -34,7 +32,6 @@ export interface BrowserConnectorOptions {
     browser?: BrowserOptions
     url?: string
     //browserContextOptions?: BrowserContextOptions
-    grounding?: GroundingClient
     virtualScreenDimensions?: { width: number, height: number },
     minScreenshots?: number,
     visuals?: ActionVisualizerOptions
@@ -52,7 +49,6 @@ export class BrowserConnector implements AgentConnector {
     private browser?: Browser;
     private context!: BrowserContext;
     private logger: Logger;
-    private grounding?: GroundingService;
 
     constructor(options: BrowserConnectorOptions = {}) {
         // console.log("options", options)
@@ -61,15 +57,8 @@ export class BrowserConnector implements AgentConnector {
         this.logger = logger.child({
             name: `connectors.${this.id}`
         });
-        if (this.options.grounding) {
-            this.grounding = new GroundingService({ client: this.options.grounding });
-        }
     }
 
-    requireGrounding(): GroundingService {
-        if (!this.grounding) throw new Error("Grounding not configured on web connector");
-        return this.grounding;
-    }
 
     async onStart(): Promise<void> {
         this.logger.info("Starting...");
@@ -113,13 +102,7 @@ export class BrowserConnector implements AgentConnector {
     }
 
     getActionSpace(): ActionDefinition<any>[] {
-        if (this.grounding) {
-            // Separate grounding
-            return [...targetWebActions, ...agnosticWebActions];
-        } else {
-            // Planner is grounded
-            return [...coordWebActions, ...agnosticWebActions];
-        }
+        return webActions;
     }
     
     // public get page(): Page {
@@ -197,8 +180,6 @@ export class BrowserConnector implements AgentConnector {
     }
 
     async getInstructions(): Promise<void | string> {
-        if (this.grounding) {
-            return moondreamTargetingInstructions;
-        }
+        return;
     }
 }
