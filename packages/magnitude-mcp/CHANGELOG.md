@@ -1,5 +1,11 @@
 # magnitude-mcp
 
+## 0.1.1
+
+### Patch Changes
+
+- [`24a00b1`](https://github.com/sagekit/magnitude/commit/24a00b1884e18b4ec88f3c591efab732352ab0a1) Thanks [@anerli](https://github.com/anerli)! - fix bundling issue
+
 ## 0.1.0
 
 ### Minor Changes
