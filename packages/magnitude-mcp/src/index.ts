@@ -9,20 +9,33 @@ import {
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import { chromium, BrowserContext } from 'patchright';
-import { WebHarness } from 'magnitude-core';
+import { WebAction, WebHarness } from 'magnitude-core';
 import * as fs from 'fs';
 import * as path from 'path';
 import { homedir } from 'os';
 
-// Profile management
-const profilesDir = path.join(homedir(), '.magnitude', 'profiles');
-if (!fs.existsSync(profilesDir)) {
-    fs.mkdirSync(profilesDir, { recursive: true });
+// Profile directory - configurable via env var or default
+const profileDir = process.env.MAGNITUDE_PROFILE_DIR || path.join(homedir(), '.magnitude', 'profiles', 'default');
+if (!fs.existsSync(profileDir)) {
+    fs.mkdirSync(profileDir, { recursive: true });
 }
+console.log(`Using browser profile directory: ${profileDir}`);
 
 // Action schemas with discriminated union
 const ClickActionSchema = z.object({
     type: z.literal('click'),
+    x: z.number(),
+    y: z.number()
+});
+
+const RightClickActionSchema = z.object({
+    type: z.literal('right_click'),
+    x: z.number(),
+    y: z.number()
+});
+
+const DoubleClickActionSchema = z.object({
+    type: z.literal('double_click'),
     x: z.number(),
     y: z.number()
 });
@@ -34,6 +47,14 @@ const TypeActionSchema = z.object({
     content: z.string()
 });
 
+const DragActionSchema = z.object({
+    type: z.literal('drag'),
+    x1: z.number(),
+    y1: z.number(),
+    x2: z.number(),
+    y2: z.number()
+});
+
 const ScrollActionSchema = z.object({
     type: z.literal('scroll'),
     x: z.number(),
@@ -42,9 +63,14 @@ const ScrollActionSchema = z.object({
     deltaY: z.number()
 });
 
-const TabActionSchema = z.object({
-    type: z.literal('tab'),
+const SwitchTabActionSchema = z.object({
+    type: z.literal('switch_tab'),
     index: z.number()
+});
+
+const NewTabActionSchema = z.object({
+    type: z.literal('new_tab'),
+    url: z.string().optional()
 });
 
 const NavigateActionSchema = z.object({
@@ -52,16 +78,26 @@ const NavigateActionSchema = z.object({
     url: z.string()
 });
 
+const KeyPressActionSchema = z.object({
+    type: z.literal('keypress'),
+    key: z.enum(['Enter', 'Tab', 'Backspace'])
+});
+
 const ActionSchema = z.discriminatedUnion('type', [
     ClickActionSchema,
+    RightClickActionSchema,
+    DoubleClickActionSchema,
     TypeActionSchema,
+    DragActionSchema,
     ScrollActionSchema,
-    TabActionSchema,
-    NavigateActionSchema
+    SwitchTabActionSchema,
+    NewTabActionSchema,
+    NavigateActionSchema,
+    KeyPressActionSchema
 ]);
 
 const ConnectBrowserSchema = z.object({
-    profile: z.string().nullable().optional()
+    url: z.string().optional()
 });
 
 const ActSchema = z.object({
@@ -107,21 +143,13 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
     return {
         tools: [
             {
-                name: 'list_profiles',
-                description: 'List all available browser profiles. Only necessary if the user wants it, otherwise use default.',
-                inputSchema: {
-                    type: 'object',
-                    properties: {},
-                },
-            },
-            {
-                name: 'connect_browser',
-                description: 'Connect to browser with profile (null for ephemeral)',
+                name: 'open_browser',
+                description: 'Open browser with persistent profile',
                 inputSchema: zodToJsonSchema(ConnectBrowserSchema),
             },
             {
                 name: 'act',
-                description: 'Perform actions in the browser',
+                description: 'Perform actions in the browser. Combine multiple actions at the same time for efficiency.',
                 inputSchema: zodToJsonSchema(ActSchema),
             },
             {
@@ -142,20 +170,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
     try {
         switch (name) {
-            case 'list_profiles': {
-                const profiles = fs.readdirSync(profilesDir, { withFileTypes: true })
-                    .filter(d => d.isDirectory())
-                    .map(d => d.name);
-
-                return {
-                    content: [{
-                        type: 'text',
-                        text: JSON.stringify(profiles.length > 0 ? profiles : ['default'])
-                    }]
-                };
-            }
-
-            case 'connect_browser': {
+            case 'open_browser': {
                 const parsed = ConnectBrowserSchema.parse(args || {});
 
                 // Close existing
@@ -166,14 +181,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                     harness = null;
                 }
 
-                // Get profile path
-                const profileName = parsed.profile || null;
-                const userDataDir = profileName
-                    ? path.join(profilesDir, profileName)
-                    : "";
-
-                // Launch browser
-                context = await chromium.launchPersistentContext(userDataDir, {
+                // Launch browser with default profile
+                context = await chromium.launchPersistentContext(profileDir, {
                     channel: "chrome",
                     headless: false,
                     viewport: { width: 1024, height: 768 },
@@ -185,8 +194,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                 harness = new WebHarness(context, { virtualScreenDimensions: { width: 1024, height: 768 }});
                 await harness.start();
 
-                // Navigate to Google by default
-                await harness.navigate('https://www.google.com');
+                // Navigate to provided URL or Google by default
+                const startUrl = parsed.url || 'https://www.google.com';
+                await harness.navigate(startUrl);
 
                 // Get current state
                 const state = await getCurrentState();
@@ -195,7 +205,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                     content: [
                         {
                             type: 'text',
-                            text: `Connected to browser${profileName ? ` with profile: ${profileName}` : ' (ephemeral)'}\n\nTabs:\n${JSON.stringify(state.tabs, null, 2)}`
+                            text: `Browser opened\n\nTabs:\n${JSON.stringify(state.tabs, null, 2)}`
                         },
                         {
                             type: 'image',
@@ -215,13 +225,44 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
                 // Execute actions
                 for (const action of parsed.actions) {
-                    if (action.type === 'navigate') {
-                        // Navigate has its own method
-                        await harness.navigate(action.url);
-                    } else {
-                        // Convert and execute other actions
-                        const webAction = convertToWebAction(action);
-                        await harness.executeAction(webAction);
+                    switch (action.type) {
+                        case 'click':
+                            await harness.click({ x: action.x, y: action.y });
+                            break;
+                        case 'right_click':
+                            await harness.rightClick({ x: action.x, y: action.y });
+                            break;
+                        case 'double_click':
+                            await harness.doubleClick({ x: action.x, y: action.y });
+                            break;
+                        case 'type':
+                            await harness.clickAndType({ x: action.x, y: action.y, content: action.content });
+                            break;
+                        case 'drag':
+                            await harness.drag({ x1: action.x1, y1: action.y1, x2: action.x2, y2: action.y2 });
+                            break;
+                        case 'scroll':
+                            await harness.scroll({ x: action.x, y: action.y, deltaX: action.deltaX, deltaY: action.deltaY });
+                            break;
+                        case 'switch_tab':
+                            await harness.switchTab({ index: action.index });
+                            break;
+                        case 'new_tab':
+                            await harness.newTab();
+                            if (action.url) {
+                                await harness.navigate(action.url);
+                            }
+                            break;
+                        case 'navigate':
+                            await harness.navigate(action.url);
+                            break;
+                        case 'keypress':
+                            if (action.key.toLowerCase() === 'enter') await harness.enter();
+                            else if (action.key.toLowerCase() === 'tab') await harness.tab();
+                            else if (action.key.toLowerCase() === 'backspace') await harness.backspace();
+                            break;
+                        default:
+                            throw new Error(`Unknown action type: ${(action as any).type}`);
                     }
                 }
 
@@ -279,20 +320,6 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     }
 });
 
-function convertToWebAction(action: Action): any {
-    switch (action.type) {
-        case 'click':
-            return { variant: 'click', x: action.x, y: action.y };
-        case 'type':
-            return { variant: 'type', x: action.x, y: action.y, content: action.content };
-        case 'scroll':
-            return { variant: 'scroll', x: action.x, y: action.y, deltaX: action.deltaX, deltaY: action.deltaY };
-        case 'tab':
-            return { variant: 'tab', index: action.index };
-        default:
-            throw new Error(`Unknown action type: ${(action as any).type}`);
-    }
-}
 
 // Cleanup on exit
 process.on('SIGINT', async () => {
