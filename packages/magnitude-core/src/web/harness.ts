@@ -120,6 +120,7 @@ export class WebHarness { // implements StateComponent
             try {
                 dpr = await this.page.evaluate(() => window.devicePixelRatio)
                 buffer = await this.page.screenshot({ type: 'png', ...options }, );
+                break; // Success! Exit the retry loop
             } catch (err) {
                 // A few possibilities:
                 // 1. Target page, context or browser has been closed
