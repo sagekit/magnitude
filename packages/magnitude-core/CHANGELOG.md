@@ -1,5 +1,11 @@
 # magnitude-core
 
+## 0.3.0-beta.0
+
+### Minor Changes
+
+- [`265a2ab`](https://github.com/sagekit/magnitude/commit/265a2ab348ec916f6382d3ad1dfe572b55e33090) Thanks [@anerli](https://github.com/anerli)! - drop support for separated grounding to reduce dependency issues and simplify code
+
 ## 0.2.32
 
 ### Patch Changes

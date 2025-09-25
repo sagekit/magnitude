@@ -8,5 +8,7 @@
     "magnitude-mcp": "0.1.0",
     "magnitude-test": "0.3.11"
   },
-  "changesets": []
+  "changesets": [
+    "thick-tips-start"
+  ]
 }
