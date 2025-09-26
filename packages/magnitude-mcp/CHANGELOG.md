@@ -1,5 +1,11 @@
 # magnitude-mcp
 
+## 0.1.3
+
+### Patch Changes
+
+- [`a8f4ee0`](https://github.com/sagekit/magnitude/commit/a8f4ee05b1269c3a2513497f085593d81992969c) Thanks [@anerli](https://github.com/anerli)! - stability wait after mcp action set
+
 ## 0.1.2
 
 ### Patch Changes
