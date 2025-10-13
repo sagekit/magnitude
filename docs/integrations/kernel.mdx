@@ -1,0 +1,98 @@
+---
+title: 'Kernel'
+description: 'Run Magnitude agents on Kernel cloud browsers'
+icon: cloud
+---
+
+[Kernel](https://www.onkernel.com/docs/introduction) offers crazy fast browser infrastructure for running browser automations at scale. By integrating with Kernel, you can run Magnitude agents and automations in production with cloud-hosted browsers.
+
+## Benefits of using Kernel with Magnitude
+
+- **No local browser management**: Run automations without installing or maintaining browsers locally
+- **Scalability**: Launch multiple browser sessions in parallel
+- **Stealth mode**: Built-in anti-detection features for web scraping
+- **Session persistence**: Maintain browser state across automation runs
+- **Live view**: Debug your cloud automations with real-time browser viewing
+
+## Adding Kernel to existing Magnitude implementations
+
+Ready to go live? Run your existing Magnitude automation in production with Kernel’s cloud browsers by updating your browser configuration.
+
+### 1. Install the Kernel SDK
+
+```bash
+npm install @onkernel/sdk
+```
+
+### 2. Initialize Kernel and create a browser
+
+Import the libraries and create a cloud browser session:
+
+```typescript
+import { startBrowserAgent } from "magnitude-core";
+import Kernel from '@onkernel/sdk';
+import z from 'zod';
+
+const client = new Kernel({
+    apiKey: process.env.KERNEL_API_KEY,
+});
+
+const kernelBrowser = await client.browsers.create();
+
+console.log(`Live view url: ${kernelBrowser.browser_live_view_url}`);
+```
+
+### 3. Update your browser configuration
+
+Replace your existing browser setup to use Kernel's CDP URL and display settings:
+
+```typescript
+const agent = await startBrowserAgent({
+    url: 'https://magnitasks.com',
+    narrate: true,
+    browser: {
+        cdp: kernelBrowser.cdp_ws_url,
+        contextOptions: {
+            viewport: { width: 1024, height: 768 }
+        }
+    },
+    virtualScreenDimensions: { width: 1024, height: 768 },
+    llm: {
+        provider: 'anthropic',
+        options: {
+            model: 'claude-sonnet-4-20250514'
+        }
+    }
+});
+```
+
+### 4. Use your agent
+
+Use Magnitude's agent methods with the Kernel-powered browser:
+
+```typescript
+await agent.act([
+    'click on "Tasks" in the sidebar',
+    'click on the first item in the "In Progress" column'
+]);
+
+const assignee = await agent.extract('Extract the task Assignee', z.string());
+
+await agent.stop();
+
+// Clean up the Kernel Browser Session
+await client.browsers.deleteByID(kernelBrowser.session_id);
+```
+
+## Quick setup with Kernel's app template
+
+Alternatively, you can use Kernel's app template that includes a pre-configured Magnitude integration:
+
+```bash
+npx @onkernel/create-kernel-app my-magnitude-app
+```
+
+Choose `TypeScript` as the programming language and then select `Magnitude` as the template. Then follow the [Quickstart guide](https://www.onkernel.com/docs/quickstart) to deploy and run your Magnitude automation on Kernel's infrastructure.
+
+For more information, see the [Kernel documentation](https://www.onkernel.com/docs/integrations/magnitude).
+

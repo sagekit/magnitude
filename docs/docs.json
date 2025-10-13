@@ -86,6 +86,12 @@
                         ]
                     },
                     {
+                        "group": "Integrations",
+                        "pages": [
+                            "integrations/kernel"
+                        ]
+                    },
+                    {
                         "group": "Reference",
                         "pages": [
                             "reference/llm-providers",
