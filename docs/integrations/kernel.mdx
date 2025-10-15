@@ -37,7 +37,12 @@ const client = new Kernel({
     apiKey: process.env.KERNEL_API_KEY,
 });
 
-const kernelBrowser = await client.browsers.create();
+const kernelBrowser = await client.browsers.create({
+    viewport: {
+        width: 1920,
+        height: 1080
+    }
+});
 
 console.log(`Live view url: ${kernelBrowser.browser_live_view_url}`);
 ```
@@ -53,10 +58,9 @@ const agent = await startBrowserAgent({
     browser: {
         cdp: kernelBrowser.cdp_ws_url,
         contextOptions: {
-            viewport: { width: 1024, height: 768 }
+            viewport: { width: 1920, height: 1080 }
         }
     },
-    virtualScreenDimensions: { width: 1024, height: 768 },
     llm: {
         provider: 'anthropic',
         options: {
