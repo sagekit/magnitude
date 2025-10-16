@@ -240,7 +240,7 @@ async function createProject(tempDir: string, projectDir: string, project: Proje
 
     let clientSnippet;
     if (project.provider === 'anthropic') {
-        const model = 'claude-sonnet-4-20250514';
+        const model = 'claude-haiku-4-5-20251001';
         clientSnippet = `llm: {
             provider: 'anthropic',
             options: {
@@ -249,7 +249,7 @@ async function createProject(tempDir: string, projectDir: string, project: Proje
             }
         },`;
     } else if (project.provider === 'openrouter') {
-        const model = project.model === 'claude' ? 'anthropic/claude-sonnet-4' : 'qwen/qwen2.5-vl-72b-instruct';
+        const model = project.model === 'claude' ? 'anthropic/claude-haiku-4.5' : 'qwen/qwen2.5-vl-72b-instruct';
         clientSnippet = `llm: {
             provider: 'openai-generic',
             options: {
@@ -260,7 +260,7 @@ async function createProject(tempDir: string, projectDir: string, project: Proje
         },`;
     } else {
         // claude code
-        const model = 'claude-sonnet-4-20250514';
+        const model = 'claude-haiku-4-5-20251001';
         clientSnippet = `llm: {
             provider: 'claude-code',
             options: {
