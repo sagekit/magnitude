@@ -11,7 +11,8 @@ declare global {
     var __magnitudeMessageEmitter: EventEmitter | undefined;
     var __magnitudeTestHooks: TestHooks | undefined;
     var __magnitudeTestPromptStack: Record<string, string[]> | undefined;
-    var __magnitudeTestRegistry: Map<string, TestMetadata> | undefined;
+    var __magnitudeTestRegistry: Map<string, RegisteredTest> | undefined;
+    var __magnitudeGroupTestHooks: GroupTestHooks | undefined;
 }
 
 if (!globalThis.__magnitudeTestFunctions) {
@@ -30,13 +31,6 @@ export type TestHooks = Record<
     (() => void | Promise<void>)[]
 >;
 
-export type TestMetadata = {
-    title: string;
-    url: string;
-    filepath: string;
-    group?: string;
-};
-
 if (!globalThis.__magnitudeTestHooks) {
     globalThis.__magnitudeTestHooks = {
         beforeAll: [],
@@ -47,16 +41,36 @@ if (!globalThis.__magnitudeTestHooks) {
 }
 export const hooks = globalThis.__magnitudeTestHooks;
 
+
+
+/** Group-level test hooks keyed by hierarchy key */
+export type GroupTestHooks = Record<string, TestHooks>;
+
 if (!globalThis.__magnitudeTestPromptStack) {
     globalThis.__magnitudeTestPromptStack = {};
 }
 export const testPromptStack = globalThis.__magnitudeTestPromptStack;
 
 if (!globalThis.__magnitudeTestRegistry) {
-    globalThis.__magnitudeTestRegistry = new Map<string, TestMetadata>();
+    globalThis.__magnitudeTestRegistry = new Map<string, RegisteredTest>();
 }
 export const testRegistry = globalThis.__magnitudeTestRegistry;
-
+if (!globalThis.__magnitudeGroupTestHooks) {
+    globalThis.__magnitudeGroupTestHooks = {};
+}
+export const groupHooks = globalThis.__magnitudeGroupTestHooks;
+/** Helper to get or initialize hook set for a hierarchy key */
+export function getOrInitGroupHookSet(key: string): TestHooks {
+    if (!groupHooks[key]) {
+        groupHooks[key] = {
+            beforeAll: [],
+            afterAll: [],
+            beforeEach: [],
+            afterEach: [],
+        };
+    }
+    return groupHooks[key];
+}
 export type TestWorkerIncomingMessage = {
     type: "execute"
     testId: string;
