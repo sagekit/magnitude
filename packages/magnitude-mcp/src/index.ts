@@ -18,8 +18,8 @@ import { homedir } from 'os';
 const config = {
     profileDir: process.env.MAGNITUDE_MCP_PROFILE_DIR || path.join(homedir(), '.magnitude', 'profiles', 'default'),
     stealth: !!process.env.MAGNITUDE_MCP_STEALTH,  // Enable stealth mode (shows warning banner but better anti-detection)
-    viewportWidth: parseInt(process.env.MAGNITUDE_MCP_VIEWPORT_WIDTH || '1024'),
-    viewportHeight: parseInt(process.env.MAGNITUDE_MCP_VIEWPORT_HEIGHT || '768'),
+    viewportWidth: parseInt(process.env.MAGNITUDE_MCP_VIEWPORT_WIDTH || '950'),
+    viewportHeight: parseInt(process.env.MAGNITUDE_MCP_VIEWPORT_HEIGHT || '720'),
 };
 
 // Ensure profile directory exists

@@ -89,10 +89,10 @@ The MCP can optionally be configured with a different persistent profile directo
         "magnitude-mcp"
       ],
       "env": {
-        "MAGNITUDE_MCP_PROFILE_DIR": "/Users/myuser/.magnitude/profiles/default", 
-        "MAGNITUDE_MCP_STEALTH": "true", 
-        "MAGNITUDE_MCP_VIEWPORT_WIDTH": "1024",
-        "MAGNITUDE_MCP_VIEWPORT_HEIGHT": "728"
+        "MAGNITUDE_MCP_PROFILE_DIR": "/Users/myuser/.magnitude/profiles/default",
+        "MAGNITUDE_MCP_STEALTH": "true",
+        "MAGNITUDE_MCP_VIEWPORT_WIDTH": "950",
+        "MAGNITUDE_MCP_VIEWPORT_HEIGHT": "720"
       }
     }
   }
@@ -100,8 +100,8 @@ The MCP can optionally be configured with a different persistent profile directo
 ```
 - `MAGNITUDE_MCP_PROFILE_DIR`: Stores cookies and local storage so that credentials can be re-used across agents using the MCP (default: `~/.magnitude/profiles/default`)
 - `MAGNITUDE_MCP_STEALTH`: Add extra stealth settings to help with anti-bot detection (default: disabled)
-- `MAGNITUDE_MCP_VIEWPORT_WIDTH`: Override viewport width (default: 1024)
-- `MAGNITUDE_MCP_VIEWPORT_WIDTH`: Override viewport width (default: 728)
+- `MAGNITUDE_MCP_VIEWPORT_WIDTH`: Override viewport width (default: 950)
+- `MAGNITUDE_MCP_VIEWPORT_HEIGHT`: Override viewport height (default: 720)
 
 ## Examples
 
@@ -116,4 +116,38 @@ It's even suitable for non-engineering tasks if you just want an easily accessib
 
 ## Troubleshooting
 
+### Model Compatibility
+
 If the agent model is not Claude Sonnet 4, Sonnet 3.7, Opus 4, Qwen 2.5 VL, or Qwen 3 VL, it will probably not work with this MCP - because the vast majority of models cannot click accurately based on an image alone.
+
+### AWS Bedrock Image Size Errors
+
+When using Claude Code with AWS Bedrock (1M context), you may encounter:
+
+```
+API Error: 400 messages.16.content.1.image.source.base64.data:
+At least one of the image dimensions exceed max allowed size for many-image requests: 2000 pixels
+```
+
+**Cause:** AWS Bedrock limits images to 2000 pixels per dimension for multi-image requests. On macOS with Retina displays, the default viewport (1024×768) uses 2x device scaling, producing 2048×1536 screenshots that exceed this limit.
+
+**Solution:** Reduce viewport size in your MCP configuration:
+
+```json
+{
+  "mcpServers": {
+    "magnitude": {
+      "command": "npx",
+      "args": ["magnitude-mcp"],
+      "env": {
+        "MAGNITUDE_MCP_VIEWPORT_WIDTH": "950",
+        "MAGNITUDE_MCP_VIEWPORT_HEIGHT": "720"
+      }
+    }
+  }
+}
+```
+
+**Why this works:** 950px × 2 (Retina scaling) = 1900px < 2000px limit ✅
+
+**Note:** This issue only affects AWS Bedrock. The standard Anthropic API has more lenient image size limits.
